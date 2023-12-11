@@ -70,6 +70,7 @@ class PromptTrainingRecommender:
 
 def main():
     config = Config()
+
     os.environ['OPENAI_API_KEY'] = config.openai_api_key
     openai.api_key = config.openai_api_key
 

@@ -1,5 +1,6 @@
-import pandas as pd
 import yfinance as yf
+import pandas as pd
+import shutil, os
 import datetime
 import requests
 
@@ -72,6 +73,12 @@ class YahooFinanceScrapper:
 
 def main():
     config = Config()
+    
+    if os.path.isdir(config.stock_info_folder_path):
+        shutil.rmtree(config.stock_info_folder_path)
+        
+    os.mkdir(config.stock_info_folder_path)
+    
     yahoo_finance_scrapper = YahooFinanceScrapper(config)
     yahoo_finance_scrapper.save_stock_info()
     
