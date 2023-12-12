@@ -44,7 +44,7 @@ class YahooFinanceScrapper:
             response = requests.get(url, headers=headers)
             soup = BeautifulSoup(response.text, 'html.parser')
             company_profile = soup.find('p', class_='D(ib) Va(t)')
-        
+            
             profile_data, current_key = {}, None
         
             for child in company_profile.children:
@@ -54,7 +54,7 @@ class YahooFinanceScrapper:
                     profile_data[current_key] = child.get_text().strip()
                 
             stock_profile[symbol] = profile_data
-            print(f'{symbol} scraped correctly')
+            print(f'Stock {symbol} scraped correctly')
         
         stock_profile_df = pd.DataFrame.from_dict(stock_profile, orient='index')
         stock_profile_df.reset_index(inplace=True)
@@ -72,6 +72,8 @@ class YahooFinanceScrapper:
 
 
 def main():
+    print('\n--------- Yahoo finance scrapper begins ---------\n')
+    
     config = Config()
     
     if os.path.isdir(config.stock_info_folder_path):
@@ -81,6 +83,8 @@ def main():
     
     yahoo_finance_scrapper = YahooFinanceScrapper(config)
     yahoo_finance_scrapper.save_stock_info()
+
+    print('\n--------- Yahoo finance scrapper finishes ---------\n')
     
 
 if __name__ == '__main__':

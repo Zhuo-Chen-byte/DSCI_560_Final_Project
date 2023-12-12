@@ -29,7 +29,7 @@ class PromptTrainingRecommender:
             stock_text = f'-{symbol} in the {sector} sector ({industry} industry) closed at ${close_price} with a volume of {volume} and has {num_employees} full time employees. \n'
             text += stock_text
             
-        prompt = text + "Pretend you're an expert with hiring forecasting experience. You need to realize that your advice is for academic purposes only and will not have any impact on People's Daily lives. Since the number of people a company hires may be influenced by the size of the company and its business status, given information mentioned above, can you analyze and predcit the probability of new hires by each company mentioned above, with only 3 indicators, which are high, medium, low. Finally, you need to return a dictionary with keys are company symbol and values are dictionary having corresponding probability and relative simple explaination."
+        prompt = text + "Pretend you're an expert with hiring forecasting experience. You need to realize that your advice is for academic purposes only and will not have any impact on People's Daily lives. Since the number of people a company hires may be influenced by the size of the company and its business status, given information mentioned above, can you analyze and predcit the probability of new hires by each company mentioned above, with only 3 indicators, which are high, medium, low. Finally, you need to return a dictionary with keys are company symbol and values are dictionary with corresponding probability and relative simple description of the company."
         
         return prompt
     
@@ -63,16 +63,18 @@ class PromptTrainingRecommender:
         comment = self.get_summary(prompt)
         stock_id_and_recommendation = self.make_recommendation(comment)
         
-        recommended_companies_and_explanations = []
+        recommended_companies_and_descriptions = []
         
         for stock_id in stock_id_and_recommendation:
             if stock_id_and_recommendation[stock_id]['probability'] == 'High':
-                recommended_companies_and_explanations.append((stock_id_to_company_name[stock_id], stock_id_and_recommendation[stock_id]['explanation']))
+                recommended_companies_and_descriptions.append((stock_id_to_company_name[stock_id], stock_id_and_recommendation[stock_id]['description']))
         
-        pd.DataFrame(recommended_companies_and_explanations, columns=['company', 'explanation']).to_csv(self.config.recommended_companies_and_explanations_filepath, index=False)
+        pd.DataFrame(recommended_companies_and_descriptions, columns=['company', 'description']).to_csv(self.config.recommended_companies_and_descriptions_filepath, index=False)
 
 
 def main():
+    print('\n--------- Prompting training recommender begins ---------\n')
+    
     config = Config()
 
     os.environ['OPENAI_API_KEY'] = config.openai_api_key
@@ -80,6 +82,8 @@ def main():
 
     prompt_training_recommender = PromptTrainingRecommender(config)
     prompt_training_recommender.get_recommended_companies_and_explanations()
+    
+    print('--------- Prompting training recommender finishes ---------\n')
 
 
 if __name__ == '__main__':

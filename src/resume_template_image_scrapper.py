@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np
 import shutil, os
 import requests
 import random
@@ -6,7 +7,6 @@ import time
 import cv2
 
 from pdf2image import convert_from_path
-
 from selenium import webdriver
 from bs4 import BeautifulSoup
 from typing import List
@@ -18,6 +18,13 @@ class ResumeTemplateImageScrapper:
     def __init__(self, config: Config, chrome_driver) -> None:
         self.config = config
         self.chrome_driver = chrome_driver
+    
+    
+    def add_border_to_image(self, image: np.ndarray):
+        return cv2.copyMakeBorder(
+            image, 3, 3, 3, 3,
+            cv2.BORDER_CONSTANT,
+            value=[0, 0, 0])
     
     
     def convert_pdfs_to_images(self) -> List[str]:
@@ -46,7 +53,7 @@ class ResumeTemplateImageScrapper:
                 cv2_images.append(cv2.imread(image_filepaths[i]))
                 os.remove(image_filepaths[i])
                 
-            combined_image = cv2.vconcat(cv2_images)
+            combined_image = self.add_border_to_image(cv2.vconcat(cv2_images))
             combined_image_name = pdf_filepath[:-4] + '.jpg'
             
             cv2.imwrite(combined_image_name, combined_image)
@@ -104,6 +111,8 @@ class ResumeTemplateImageScrapper:
 
 
 def main():
+    print('\n--------- Resume template image scrapper begins ---------\n')
+    
     config = Config()
 
     if os.path.isdir(config.resume_template_images_folder_path):
@@ -119,6 +128,8 @@ def main():
     resume_template_image_filepaths = resume_template_image_scrapper.convert_pdfs_to_images()
 
     pd.DataFrame(zip(resume_template_image_filepaths, resume_template_urls), columns=['filepath', 'url']).to_csv(config.resume_template_images_metadata_filepath, index=False)
+
+    print('\n--------- Resume template image scrapper finishes ---------\n')
 
 
 if __name__ == '__main__':

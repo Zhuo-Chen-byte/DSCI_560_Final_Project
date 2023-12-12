@@ -4,7 +4,6 @@ class Config:
     def __init__(self):
         self.openai_api_key = 'my_openai_api_key'
         
-        
         # Url and local folder path to store stock info, company recommendations, and explanations
         self.stock_list = ['AAPL', 'ACN', 'ADBE', 'AMD', 'AMZN',
             'ASML', 'AVGO', 'BABA', 'CRM', 'GOOGL',
@@ -18,12 +17,11 @@ class Config:
         
         self.stock_info_folder_path = '/Users/zhuochen_henry/Desktop/DSCI_560_Final_Project/stock_info_and_recommendations'
         self.stock_info_filepath = os.path.join(self.stock_info_folder_path, 'stock_info.csv')
-        self.recommended_companies_and_explanations_filepath = os.path.join(self.stock_info_folder_path, 'recommended_companies_and_explanations.csv')
+        self.recommended_companies_and_descriptions_filepath = os.path.join(self.stock_info_folder_path, 'recommended_companies_and_descriptions.csv')
         
         self.historical_h1b_sponsorships_and_recommendations_folder_path = '/Users/zhuochen_henry/Desktop/DSCI_560_Final_Project/historical_h1b_sponsorships_and_recommendations'
         self.historical_h1b_sponsorships_filepath = os.path.join(self.historical_h1b_sponsorships_and_recommendations_folder_path, 'historical_h1b_sponsorships_2018_2023.csv')
-        self.recommended_companies_and_explanations_filepath_for_international_students = os.path.join(self.historical_h1b_sponsorships_and_recommendations_folder_path, 'recommended_companies_and_explanations.csv')
-        
+        self.recommended_companies_and_descriptions_for_international_students_filepath = os.path.join(self.historical_h1b_sponsorships_and_recommendations_folder_path, 'recommended_companies_and_descriptions_for_international_students.csv')
         
         # Url and local folder path to access template resumes
         self.resume_template_base_url = 'https://www.overleaf.com/latex/templates?q=technical+resume'

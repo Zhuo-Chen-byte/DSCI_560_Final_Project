@@ -4,3 +4,4 @@
 models/gpt2.bin
 *.jpg
 *.csv
+*.bin

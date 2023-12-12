@@ -1,5 +1,6 @@
 import streamlit as st
 import pandas as pd
+import numpy as np
 import os
 
 from dotenv import load_dotenv
@@ -26,8 +27,8 @@ load_dotenv()
 config = Config()
 os.environ['OPENAI_API_KEY'] = config.openai_api_key
 
-recommended_companies_and_explanations = pd.read_csv(config.recommended_companies_and_explanations_filepath)
-recommended_companies_and_explanations_for_international_students = pd.read_csv(config.recommended_companies_and_explanations_filepath_for_international_students)
+recommended_companies_and_descriptions = pd.read_csv(config.recommended_companies_and_descriptions_filepath)
+recommended_companies_and_descriptions_for_international_students = pd.read_csv(config.recommended_companies_and_descriptions_for_international_students_filepath)
 resume_template_images_metadata = pd.read_csv(config.resume_template_images_metadata_filepath)
 
 
@@ -60,7 +61,7 @@ def get_vectorstore(text_chunks):
 def get_conversation_chain(vectorstore):
     memory = ConversationBufferMemory(memory_key='chat_history', return_messages=True)
 
-    llm = CTransformers(model='models/gpt2.bin', model_type='gpt2')
+    llm = CTransformers(model='local_models/gpt2.bin', model_type='gpt2')
     
     conversation_chain = ConversationalRetrievalChain.from_llm(
         llm=llm,
@@ -157,37 +158,43 @@ def main():
 
     st.markdown('<p class="big-font"> Common Questions </p>',
                 unsafe_allow_html=True)
+    
+    # if st.button('How can I improve my skills'):
+        # generate_answer('How can I improve my skills')
+        # st.session_state.display_chat = True
 
-    if st.button('How can I improve my skills'):
-        generate_answer('How can I improve my skills')
-        st.session_state.display_chat = True
-
-    if st.button('Evaluate my background'):
-        generate_answer('Evaluate my background')
-        st.session_state.display_chat = True
+    # if st.button('Evaluate my background'):
+        # generate_answer('Evaluate my background')
+        # st.session_state.display_chat = True
     
     if st.button('Recommend some tech companies that are likely to hire'):
-        st.write('**Answer:**\n')
-        st.write('A few recommended companies and their explanations are \n')
+        num_companies = len(recommended_companies_and_descriptions)
         
-        for i in range(len(recommended_companies_and_explanations)):
-            st.write(f'**{recommended_companies_and_explanations.iloc[i, 0]}**, which is {recommended_companies_and_explanations.iloc[i, 1]} \n')
+        st.write('**Answer:**\n')
+        st.write('A few recommended companies and their descriptions are \n')
+        
+        for i in range(num_companies):
+            st.write(f'**{recommended_companies_and_descriptions.iloc[i, 0]}**, which is {recommended_companies_and_descriptions.iloc[i, 1]} \n')
 
-    if st.button('Recommend some tech companies that are likely to hire new grad'):
+    if st.button('Recommend some tech companies that are likely to provide h-1b sponsorships'):
         st.write('**Answer:**\n')
-        st.write('A few recommended companies and their explanations are \n')
+        num_companies = len(recommended_companies_and_descriptions_for_international_students)
         
-        for i in range(len(recommended_companies_and_explanations_for_international_students)):
-            st.write(f'**{recommended_companies_and_explanations_for_international_students.iloc[i, 0]}**, which is {recommended_companies_and_explanations_for_international_students.iloc[i, 1]} \n')
+        if num_companies == 0:
+            st.write('It is terrible for international students to land a job. \n')
+        else:
+            st.write('A few recommended companies and their descriptions are \n')
+        
+            for i in range(num_companies):
+                st.write(f'**{recommended_companies_and_descriptions_for_international_students.iloc[i, 0]}**, which is {recommended_companies_and_descriptions_for_international_students.iloc[i, 1]} \n')
     
     if st.button('Show some resume templates'):
         num_images, num_images_shown = len(resume_template_images_metadata), 0
         
         for i in range(num_images):
             try:
-                st.write('\n\n\n**----------------------------------------------------- Resume Begins -----------------------------------------------------**\n\n\n')
                 st.image(resume_template_images_metadata.iloc[i, 0], caption='url: ' + resume_template_images_metadata.iloc[i, 1])
-                st.write('\n\n\n**------------------------------------------------------ Resume Ends ------------------------------------------------------**\n\n\n')
+                st.write('\n\n\n')
                 
                 num_images_shown += 1
             except:
