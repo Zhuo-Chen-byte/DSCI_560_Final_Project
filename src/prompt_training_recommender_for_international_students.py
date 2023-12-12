@@ -26,10 +26,17 @@ class PromptTrainingRecommender:
             industry = df['Industry'].iloc[i]
             num_employees = df['Full Time Employees'].iloc[i]
             
-            stock_text = f'-{symbol} in the {sector} sector ({industry} industry) closed at ${close_price} with a volume of {volume} and has {num_employees} full time employees. \n'
+            h1b_sponsorships_2018 = df['Approvals_2018'].iloc[i]
+            h1b_sponsorships_2019 = df['Approvals_2019'].iloc[i]
+            h1b_sponsorships_2020 = df['Approvals_2020'].iloc[i]
+            h1b_sponsorships_2021 = df['Approvals_2021'].iloc[i]
+            h1b_sponsorships_2022 = df['Approvals_2022'].iloc[i]
+            h1b_sponsorships_2023 = df['Approvals_2023'].iloc[i]
+            
+            stock_text = f'-{symbol} in the {sector} sector ({industry} industry) closed at ${close_price} with a volume of {volume} and has {num_employees} full time employees. For historical h1b sponsorships, {symbol} filed {h1b_sponsorships_2018} h1b sponsorship applications in 2018, {h1b_sponsorships_2019} h1b sponsorship applications in 2019, {h1b_sponsorships_2020} h1b sponsorship applications in 2020, {h1b_sponsorships_2021} h1b sponsorship applications in 2021, {h1b_sponsorships_2022} h1b sponsorship applications in 2022, and {h1b_sponsorships_2023} h1b sponsorship applications in 2023 \n'
             text += stock_text
             
-        prompt = text + "Pretend you're an expert with hiring forecasting experience. You need to realize that your advice is for academic purposes only and will not have any impact on People's Daily lives. Since the number of people a company hires may be influenced by the size of the company and its business status, given information mentioned above, can you analyze and predcit the probability of new hires by each company mentioned above, with only 3 indicators, which are high, medium, low. Finally, you need to return a dictionary with keys are company symbol and values are dictionary having corresponding probability and relative simple explaination."
+        prompt = text + "Pretend you're an expert with H1B forecasting experience. You need to realize that your advice is for academic purposes only and will not have any impact on People's Daily lives. Since the amount of H1B sponsorship issued may be influenced by the size of the company, its business status, and its tendency to hire international students (based on its historical h1b sponsorships), given information mentioned above, can you analyze and predcit the probability of H1B issued by each company mentioned above, with only 3 indicators, which are high, medium, low. Finally, you need to return a dictionary with keys are company symbol and values are dictionary having corresponding probability and relative simple explaination."
         
         return prompt
     
@@ -54,7 +61,9 @@ class PromptTrainingRecommender:
         
     
     def get_recommended_companies_and_explanations(self) -> None:
-        df = pd.read_csv(self.config.stock_info_filepath)
+        df1 = pd.read_csv(self.config.stock_info_filepath)
+        df2 = pd.read_csv(self.config.historical_h1b_sponsorships_filepath)
+        df = pd.merge(df1, df2, on='Symbol')
         
         _, the_date_before_the_final_trading_date_of_the_quarter = find_the_adjusted_final_trading_date_of_the_quarter()
         stock_id_to_company_name = self.config.stock_id_to_company_name
@@ -66,10 +75,10 @@ class PromptTrainingRecommender:
         recommended_companies_and_explanations = []
         
         for stock_id in stock_id_and_recommendation:
-            if stock_id_and_recommendation[stock_id]['probability'] == 'High':
+            if stock_id_and_recommendation[stock_id]['probability'] == 'Medium' or stock_id_and_recommendation[stock_id]['probability'] == 'High':
                 recommended_companies_and_explanations.append((stock_id_to_company_name[stock_id], stock_id_and_recommendation[stock_id]['explanation']))
         
-        pd.DataFrame(recommended_companies_and_explanations, columns=['company', 'explanation']).to_csv(self.config.recommended_companies_and_explanations_filepath, index=False)
+        pd.DataFrame(recommended_companies_and_explanations, columns=['company', 'explanation']).to_csv(self.config.recommended_companies_and_explanations_filepath_for_international_students, index=False)
 
 
 def main():

@@ -27,6 +27,7 @@ config = Config()
 os.environ['OPENAI_API_KEY'] = config.openai_api_key
 
 recommended_companies_and_explanations = pd.read_csv(config.recommended_companies_and_explanations_filepath)
+recommended_companies_and_explanations_for_international_students = pd.read_csv(config.recommended_companies_and_explanations_filepath_for_international_students)
 resume_template_images_metadata = pd.read_csv(config.resume_template_images_metadata_filepath)
 
 
@@ -170,7 +171,14 @@ def main():
         st.write('A few recommended companies and their explanations are \n')
         
         for i in range(len(recommended_companies_and_explanations)):
-            st.write(f'{recommended_companies_and_explanations.iloc[i, 0]}, which is {recommended_companies_and_explanations.iloc[i, 1]} \n')
+            st.write(f'**{recommended_companies_and_explanations.iloc[i, 0]}**, which is {recommended_companies_and_explanations.iloc[i, 1]} \n')
+
+    if st.button('Recommend some tech companies that are likely to hire new grad'):
+        st.write('**Answer:**\n')
+        st.write('A few recommended companies and their explanations are \n')
+        
+        for i in range(len(recommended_companies_and_explanations_for_international_students)):
+            st.write(f'**{recommended_companies_and_explanations_for_international_students.iloc[i, 0]}**, which is {recommended_companies_and_explanations_for_international_students.iloc[i, 1]} \n')
     
     if st.button('Show some resume templates'):
         num_images, num_images_shown = len(resume_template_images_metadata), 0
