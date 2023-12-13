@@ -5,7 +5,7 @@
 4. resume_template_image_scrapper.py random downloads a few resume templates from ```config.resume_template_base_url```, transfers them as images, and stores them into config.resume_template_images_folder_path
 5. Please keep 2 config.py the same (1 in the folder, another inside /src)
 6. ```main.py``` initiates a streamlit interface. To see further details, visit https://youtu.be/DRdQT6L7uoQ
-7. To initiate the program, run the command line in the project directory.
+7. To initiate the program, run the command line in the project directory
    <br/>```sh commands.sh```
 8. Please include model bins in the local directory and adjust line 62 in main.py
    <br/>```llm = CTransformers(model='local_models/gpt2.bin', model_type='gpt2')```
