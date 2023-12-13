@@ -1,7 +1,8 @@
 import streamlit as st
 import pandas as pd
 import numpy as np
-import os
+import PyPDF2
+import os, re
 
 from dotenv import load_dotenv
 from PyPDF2 import PdfReader
@@ -39,6 +40,27 @@ def get_pdf_text(pdf_docs):
         text += ''.join(page.extract_text() for page in PdfReader(pdf_doc).pages)
         
     return text
+    
+
+def resume_word_count(pdf_docs) -> str:
+    reader = PyPDF2.PdfReader(pdf_docs)
+    num_pages = len(reader.pages)
+    text = ''
+        
+    for page_num in range(num_pages):
+            text += reader.pages[page_num].extract_text()
+    
+    words = re.findall(r'\w+', text)
+    word_count = len(words)
+
+    if word_count < 250:
+        feedback = 'You may add more details.'
+    elif 250 <= word_count <= 350:
+        feedback = 'Your resume looks good.'
+    else:
+        feedback = 'There may be too many words in your resume. Try making it more concise.'
+
+    return feedback
 
 
 def get_text_chunks(text):
@@ -123,7 +145,7 @@ def main():
     user_question = st.text_input('Ask questions based on your resume:')
     
     # Page-shift
-    left_shift, _, right_shift = st.columns([1, 1, 1])
+    left_shift, right_shift = st.columns([1, 1])
     
     if user_question:
         if st.button('Submit my question'):
@@ -188,7 +210,7 @@ def main():
             for i in range(num_companies):
                 st.write(f'**{recommended_companies_and_descriptions_for_international_students.iloc[i, 0]}**, which is {recommended_companies_and_descriptions_for_international_students.iloc[i, 1]} \n')
     
-    if st.button('Show some resume templates'):
+    if st.button('Recommend some resume templates'):
         num_images, num_images_shown = len(resume_template_images_metadata), 0
         
         for i in range(num_images):
@@ -203,7 +225,6 @@ def main():
             if num_images_shown >= 3:
                 break
         
-    
     # Side-bar to upload resumes
     with st.sidebar:
         st.subheader('Your Resume :clipboard:')
@@ -212,12 +233,22 @@ def main():
                                     accept_multiple_files=True)
             
         if st.button('Analyze Your Resume :memo:'):
-            with st.spinner('Analyzing your resume ...'):
+            with st.spinner('Analyzing your resume and provide layout recommendation ...'):
                 raw_text = get_pdf_text(pdf_docs)
                 text_chunks = get_text_chunks(raw_text)
                 vectorstore = get_vectorstore(text_chunks)
                 
                 st.session_state.conversation = get_conversation_chain(vectorstore)
+                
+                # Analyze the layout of your resume
+                word_count = len(re.findall(r'\w+', raw_text))
+               
+                if word_count < 250:
+                    st.button('You may add more details.')
+                elif 250 <= word_count <= 350:
+                    st.button('Your resume looks good.')
+                else:
+                    st.button('There may be too many words in your resume. Try making it more concise.')
 
 
 if __name__ == '__main__':

@@ -8,8 +8,8 @@ import cv2
 
 from pdf2image import convert_from_path
 from selenium import webdriver
+from typing import Tuple, List
 from bs4 import BeautifulSoup
-from typing import List
 
 from config import Config
 
@@ -27,17 +27,14 @@ class ResumeTemplateImageScrapper:
             value=[0, 0, 0])
     
     
-    def convert_pdfs_to_images(self) -> List[str]:
+    def convert_pdfs_to_images(self, resume_template_pdf_filepaths: List[str]) -> List[str]:
         resume_template_images_folder_path = self.config.resume_template_images_folder_path
-        pdf_filepaths = os.listdir(resume_template_images_folder_path)
         resume_template_image_filepaths = []
-        
-        for filename in pdf_filepaths:
-            if not filename.endswith('.pdf'):
+
+        for pdf_filepath in resume_template_pdf_filepaths:
+            if not pdf_filepath.endswith('.pdf'):
                 continue
                 
-            pdf_filepath = os.path.join(resume_template_images_folder_path, filename)
-            
             images = convert_from_path(pdf_filepath)
             os.remove(pdf_filepath)
             
@@ -54,31 +51,37 @@ class ResumeTemplateImageScrapper:
                 os.remove(image_filepaths[i])
                 
             combined_image = self.add_border_to_image(cv2.vconcat(cv2_images))
-            combined_image_name = pdf_filepath[:-4] + '.jpg'
+            combined_image_filepath = pdf_filepath[:-4] + '.jpg'
             
-            cv2.imwrite(combined_image_name, combined_image)
-            resume_template_image_filepaths.append(combined_image_name)
-        
+            cv2.imwrite(combined_image_filepath, combined_image)
+            resume_template_image_filepaths.append(combined_image_filepath)
+    
         return resume_template_image_filepaths
     
     
-    def download_resume_templates(self, resume_template_urls: List[str]) -> None:
+    def download_resume_templates(self, resume_template_urls: List[str]) -> List[str]:
         resume_template_images_folder_path = self.config.resume_template_images_folder_path
+        resume_template_pdf_filepaths = []
         
         for url in resume_template_urls:
             pdf_name = url.split('/')[-1]
             pdf_data = requests.get(url).content
-        
-            with open(os.path.join(resume_template_images_folder_path, pdf_name), 'wb') as file:
-                file.write(pdf_data)
+            filepath = os.path.join(resume_template_images_folder_path, pdf_name)
+                
+            with open(filepath, 'wb') as f:
+                f.write(pdf_data)
+            
+            resume_template_pdf_filepaths.append(filepath)
+    
+        return resume_template_pdf_filepaths
 
 
-    def scrape_resume_templates_randomly(self) -> List[str]:
+    def scrape_resume_templates_randomly(self) -> Tuple[List[str], List[str]]:
         chrome_driver = self.chrome_driver
         resume_template_base_url = self.config.resume_template_base_url
         
         chrome_driver.get(resume_template_base_url)
-        time.sleep(15)
+        time.sleep(10)
 
         web_html = chrome_driver.page_source
         soup = BeautifulSoup(web_html, 'html.parser')
@@ -98,16 +101,14 @@ class ResumeTemplateImageScrapper:
             
                 resume_template_urls.append(pdf_url + '.pdf')
         
+        resume_template_pdf_filepaths = self.download_resume_templates(resume_template_urls)
         url_count = len(resume_template_urls)
-        random.shuffle(resume_template_urls)
-        
-        self.download_resume_templates(resume_template_urls)
         chrome_driver.quit()
         
         for i in range(url_count):
             resume_template_urls[i] = resume_template_urls[i][:-4]
-            
-        return resume_template_urls
+        
+        return resume_template_urls, resume_template_pdf_filepaths
 
 
 def main():
@@ -124,8 +125,8 @@ def main():
     chrome_driver = webdriver.Chrome()
     
     resume_template_image_scrapper = ResumeTemplateImageScrapper(config, chrome_driver)
-    resume_template_urls = resume_template_image_scrapper.scrape_resume_templates_randomly()
-    resume_template_image_filepaths = resume_template_image_scrapper.convert_pdfs_to_images()
+    resume_template_urls, resume_template_pdf_filepaths = resume_template_image_scrapper.scrape_resume_templates_randomly()
+    resume_template_image_filepaths = resume_template_image_scrapper.convert_pdfs_to_images(resume_template_pdf_filepaths)
 
     pd.DataFrame(zip(resume_template_image_filepaths, resume_template_urls), columns=['filepath', 'url']).to_csv(config.resume_template_images_metadata_filepath, index=False)
 
