@@ -11,7 +11,7 @@
 4. resume_template_image_scrapper.py random downloads a few resume templates from ```config.resume_template_base_url```, transfers them as images, and stores them into ```config.resume_template_images_folder_path```
    <br/>
    <br/>
-5. Please keep 2 config.py the same (1 in the folder, another inside /src)
+5. Please keep 2 ``config.py`` the same (1 in the folder, another inside /src)
    <br/>
    <br/>
 6. ```main.py``` initiates a streamlit interface. To see further details, visit
