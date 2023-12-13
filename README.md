@@ -10,5 +10,6 @@
    <br/>```sh commands.sh```
 9. Please include model bins in the local directory and adjust line 62 in main.py
    <br/>```llm = CTransformers(model='local_models/gpt2.bin', model_type='gpt2')```
-10. You need to make the dataset historical_h1b_sponsorships_2018_2023.csv yourself from
+   and adjust word embeddings accordingly
+11. You need to make the dataset historical_h1b_sponsorships_2018_2023.csv yourself from
    <br/> https://www.uscis.gov/tools/reports-and-studies/h-1b-employer-data-hub
