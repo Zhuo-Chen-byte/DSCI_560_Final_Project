@@ -5,7 +5,7 @@
 <br/>
 3. prompt_training_recommender_for_international_students.py prompt-trains GPT-4 based on the stock information data & previous years h-1b sponsorships, recommends several companies that are likely to provide h-1b sponsorships (with short descriptions of each), and stores the recommendations to the given filepath ```config.recommended_companies_and_descriptions_for_international_students_filepath```
 <br/>
-4. resume_template_image_scrapper.py random downloads a few resume templates from ```config.resume_template_base_url```, transfers them as images, and stores them into config.resume_template_images_folder_path
+4. resume_template_image_scrapper.py random downloads a few resume templates from ```config.resume_template_base_url```, transfers them as images, and stores them into ```config.resume_template_images_folder_path```
 <br/>
 5. Please keep 2 config.py the same (1 in the folder, another inside /src)
 <br/>
